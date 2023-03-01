@@ -215,37 +215,89 @@ const waitForDeploymentToStart = async ({
     checkIntervalInMilliseconds
   );
 
-  for (let i = 0; i < iterations; i++) {
-    try {
-      const deployments = await octokit.rest.repos.listDeployments({
-        owner,
-        repo,
-        sha,
-        environment,
-      });
+  let actualDeployment = null;
 
-      const deployment =
-        deployments.data.length > 0 &&
-        deployments.data.find((deployment) => {
-          return deployment.creator.login === actorName;
+  console.log({ environment });
+
+  if (Array.isArray(environment)) {
+    environment.forEach(async (env) => {
+      for (let i = 0; i < iterations; i++) {
+        try {
+          const deployments = await octokit.rest.repos.listDeployments({
+            owner,
+            repo,
+            sha,
+            environment: env,
+          });
+
+          const deployment =
+            deployments.data.length > 0 &&
+            deployments.data.find((deployment) => {
+              return deployment.creator.login === actorName;
+            });
+
+          if (deployment) {
+            actualDeployment = deployment;
+          }
+
+          console.log(
+            `Could not find any deployments for actor ${actorName}, retrying (attempt ${
+              i + 1
+            } / ${iterations})`
+          );
+        } catch (e) {
+          console.log(
+            `Error while fetching deployments, retrying (attempt ${
+              i + 1
+            } / ${iterations})`
+          );
+
+          console.error(e);
+        }
+
+        await wait(checkIntervalInMilliseconds);
+      }
+    });
+  } else {
+    for (let i = 0; i < iterations; i++) {
+      try {
+        const deployments = await octokit.rest.repos.listDeployments({
+          owner,
+          repo,
+          sha,
+          environment,
         });
 
-      if (deployment) {
-        return deployment;
+        const deployment =
+          deployments.data.length > 0 &&
+          deployments.data.find((deployment) => {
+            return deployment.creator.login === actorName;
+          });
+
+        if (deployment) {
+          actualDeployment = deployment;
+        }
+
+        console.log(
+          `Could not find any deployments for actor ${actorName}, retrying (attempt ${
+            i + 1
+          } / ${iterations})`
+        );
+      } catch (e) {
+        console.log(
+          `Error while fetching deployments, retrying (attempt ${
+            i + 1
+          } / ${iterations})`
+        );
+
+        console.error(e);
       }
 
-      throw new Error(`no ${actorName} deployment found`);
-    } catch (e) {
-      console.log(
-        `Could not find any deployments for actor ${actorName}, retrying (attempt ${
-          i + 1
-        } / ${iterations})`
-      );
       await wait(checkIntervalInMilliseconds);
     }
   }
 
-  return null;
+  return actualDeployment ?? null;
 };
 
 async function getShaForPullRequest({ octokit, owner, repo, number }) {
@@ -326,7 +378,7 @@ const run = async () => {
       sha: sha,
       environment: ENVIRONMENT,
       actorName: 'vercel[bot]',
-      maxTimeout: MAX_TIMEOUT / 2,
+      maxTimeout: MAX_TIMEOUT,
       checkIntervalInMilliseconds: CHECK_INTERVAL_IN_MS,
     });
 
