@@ -211,8 +211,6 @@ const waitForDeploymentToStart = async ({
 
   let actualDeployment = null;
 
-  console.log({ environment });
-
   if (Array.isArray(environment)) {
     environment.forEach(async (env) => {
       for (let i = 0; i < iterations; i++) {
@@ -233,6 +231,8 @@ const waitForDeploymentToStart = async ({
           if (deployment) {
             actualDeployment = deployment;
           }
+
+          console.log({ environment, env });
 
           console.log(
             `Could not find any deployments for actor ${actorName}, retrying (attempt ${
@@ -271,6 +271,8 @@ const waitForDeploymentToStart = async ({
         if (deployment) {
           actualDeployment = deployment;
         }
+
+        console.log({ environment });
 
         console.log(
           `Could not find any deployments for actor ${actorName}, retrying (attempt ${
