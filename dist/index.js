@@ -238,7 +238,7 @@ const waitForDeploymentToStart = async ({
             actualDeployment = deployment;
           }
 
-          console.log({ environment, env });
+          console.log({ environment, env, deployment, actualDeployment });
 
           console.log(
             `Could not find any deployments for actor ${actorName}, retrying (attempt ${
