@@ -210,7 +210,7 @@ const waitForDeploymentToStart = async ({
   );
 
   if (Array.isArray(environment)) {
-    for (let x = 0; x < environment.length; x++) {
+    for (let x = 0; x < environment.length - 1; x++) {
       for (let i = 0; i < iterations; i++) {
         try {
           const deployments = await octokit.rest.repos.listDeployments({
