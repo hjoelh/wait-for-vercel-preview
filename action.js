@@ -210,14 +210,14 @@ const waitForDeploymentToStart = async ({
   );
 
   if (Array.isArray(environment)) {
-    for (let i = 0; i < environment.length; i++) {
+    for (let x = 0; x < environment.length; x++) {
       for (let i = 0; i < iterations; i++) {
         try {
           const deployments = await octokit.rest.repos.listDeployments({
             owner,
             repo,
             sha,
-            environment: environment[i],
+            environment: environment[x],
           });
 
           const deployment =
@@ -230,12 +230,10 @@ const waitForDeploymentToStart = async ({
             return deployment;
           }
 
-          console.log({ deploymentName: environment[i] });
-
           console.log(
-            `Could not find any deployments for actor ${actorName}, retrying (attempt ${
-              i + 1
-            } / ${iterations})`
+            `Could not find any deployments for actor ${actorName} & deployment ${
+              environment[x]
+            }, retrying (attempt ${i + 1} / ${iterations})`
           );
         } catch (e) {
           console.log(
