@@ -209,17 +209,15 @@ const waitForDeploymentToStart = async ({
     checkIntervalInMilliseconds
   );
 
-  let actualDeployment = null;
-
   if (Array.isArray(environment)) {
-    environment.forEach(async (env) => {
+    for (let i = 0; i < environment.length; i++) {
       for (let i = 0; i < iterations; i++) {
         try {
           const deployments = await octokit.rest.repos.listDeployments({
             owner,
             repo,
             sha,
-            environment: env,
+            environment: environment[i],
           });
 
           const deployment =
@@ -229,10 +227,10 @@ const waitForDeploymentToStart = async ({
             });
 
           if (deployment) {
-            actualDeployment = deployment;
+            return deployment;
           }
 
-          console.log({ environment, env, deployment, actualDeployment });
+          console.log({ deploymentName: environment[i] });
 
           console.log(
             `Could not find any deployments for actor ${actorName}, retrying (attempt ${
@@ -251,7 +249,7 @@ const waitForDeploymentToStart = async ({
 
         await wait(checkIntervalInMilliseconds);
       }
-    });
+    }
   } else {
     for (let i = 0; i < iterations; i++) {
       try {
@@ -269,7 +267,7 @@ const waitForDeploymentToStart = async ({
           });
 
         if (deployment) {
-          actualDeployment = deployment;
+          return deployment;
         }
 
         console.log({ environment });
@@ -292,8 +290,6 @@ const waitForDeploymentToStart = async ({
       await wait(checkIntervalInMilliseconds);
     }
   }
-
-  return actualDeployment ?? null;
 };
 
 async function getShaForPullRequest({ octokit, owner, repo, number }) {
