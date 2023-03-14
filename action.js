@@ -210,43 +210,54 @@ const waitForDeploymentToStart = async ({
   );
 
   if (Array.isArray(environment)) {
-    for (let x = 0; x < environment.length; x++) {
-      for (let i = 0; i < iterations; i++) {
-        try {
-          const deployments = await octokit.rest.repos.listDeployments({
-            owner,
-            repo,
-            sha,
-            environment: environment[x],
+    let arrayIndex = 0;
+    const iterateArray = (environment) => {
+      if (arrayIndex < environment.length) {
+        const string = environment[arrayIndex];
+        arrayIndex++;
+        return string;
+      }
+      arrayIndex = 0;
+      return environment[arrayIndex];
+    };
+
+    for (let i = 0; i < iterations; i++) {
+      try {
+        const env = iterateArray(environment);
+
+        const deployments = await octokit.rest.repos.listDeployments({
+          owner,
+          repo,
+          sha,
+          environment: env,
+        });
+
+        const deployment =
+          deployments.data.length > 0 &&
+          deployments.data.find((deployment) => {
+            return deployment.creator.login === actorName;
           });
 
-          const deployment =
-            deployments.data.length > 0 &&
-            deployments.data.find((deployment) => {
-              return deployment.creator.login === actorName;
-            });
-
-          if (deployment) {
-            return deployment;
-          }
-
-          console.log(
-            `Could not find any deployments for actor ${actorName} & deployment ${
-              environment[x]
-            }, retrying (attempt ${i + 1} / ${iterations})`
-          );
-        } catch (e) {
-          console.log(
-            `Error while fetching deployments, retrying (attempt ${
-              i + 1
-            } / ${iterations})`
-          );
-
-          console.error(e);
+        if (deployment) {
+          return deployment;
         }
 
-        await wait(checkIntervalInMilliseconds);
+        console.log(
+          `Could not find any deployments for actor ${actorName} & deployment ${env}, retrying (attempt ${
+            i + 1
+          } / ${iterations})`
+        );
+      } catch (e) {
+        console.log(
+          `Error while fetching deployments, retrying (attempt ${
+            i + 1
+          } / ${iterations})`
+        );
+
+        console.error(e);
       }
+
+      await wait(checkIntervalInMilliseconds);
     }
   } else {
     for (let i = 0; i < iterations; i++) {
