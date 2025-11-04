@@ -324,6 +324,9 @@ async function getShaForPullRequest({ octokit, owner, repo, number }) {
     pull_number: PR_NUMBER,
   });
 
+  console.log(currentPR);
+  console.log(JSON.parse(JSON.stringify(currentPR, null, 2)));
+
   if (currentPR.status !== 200) {
     core.setFailed('Could not get information about the current pull request');
     return;
