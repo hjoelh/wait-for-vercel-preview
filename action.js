@@ -232,11 +232,9 @@ const waitForDeploymentToStart = async ({
           sha,
         });
 
-        console.log('all deployments', deployments);
-        console.log({ env, owner, repo, sha });
-
-        const deployment = deployments.data
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+        const deployment = deployments.data.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        )[0];
 
         if (deployment) {
           return deployment;
@@ -278,8 +276,6 @@ const waitForDeploymentToStart = async ({
         if (deployment) {
           return deployment;
         }
-
-        console.log({ environment });
 
         console.log(
           `Could not find any deployments for actor ${actorName}, retrying (attempt ${
