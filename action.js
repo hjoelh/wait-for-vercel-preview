@@ -229,7 +229,6 @@ const waitForDeploymentToStart = async ({
           owner,
           repo,
           sha,
-          environment: env,
         });
 
         console.log('all deployments', deployments);
