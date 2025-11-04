@@ -228,7 +228,6 @@ const waitForDeploymentToStart = async ({
         const deployments = await octokit.rest.repos.listDeployments({
           owner,
           repo,
-          sha,
         });
 
         console.log('all deployments', deployments);
