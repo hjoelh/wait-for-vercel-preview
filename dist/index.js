@@ -240,11 +240,8 @@ const waitForDeploymentToStart = async ({
         console.log('all deployments', deployments);
         console.log({ env, owner, repo, sha });
 
-        const deployment =
-          deployments.data.length > 0 &&
-          deployments.data.find((deployment) => {
-            return deployment.creator.login === actorName;
-          });
+        const deployment = deployments.data
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
 
         if (deployment) {
           return deployment;
