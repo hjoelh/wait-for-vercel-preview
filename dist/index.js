@@ -238,6 +238,8 @@ const waitForDeploymentToStart = async ({
           environment: env,
         });
 
+        console.log("all deployments", deployments)
+
         const deployment =
           deployments.data.length > 0 &&
           deployments.data.find((deployment) => {
