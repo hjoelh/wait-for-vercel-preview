@@ -420,16 +420,16 @@ const run = async () => {
     // Set output
     core.setOutput('url', targetUrl);
 
-    // Wait for url to respond with a success
-    console.log(`Waiting for a status code 200 from: ${targetUrl}`);
+    // // Wait for url to respond with a success
+    // console.log(`Waiting for a status code 200 from: ${targetUrl}`);
 
-    await waitForUrl({
-      url: targetUrl,
-      maxTimeout: MAX_TIMEOUT,
-      checkIntervalInMilliseconds: CHECK_INTERVAL_IN_MS,
-      vercelPassword: VERCEL_PASSWORD,
-      path: PATH,
-    });
+    // await waitForUrl({
+    //   url: targetUrl,
+    //   maxTimeout: MAX_TIMEOUT,
+    //   checkIntervalInMilliseconds: CHECK_INTERVAL_IN_MS,
+    //   vercelPassword: VERCEL_PASSWORD,
+    //   path: PATH,
+    // });
   } catch (error) {
     core.setFailed(error.message);
   }
