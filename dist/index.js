@@ -238,7 +238,8 @@ const waitForDeploymentToStart = async ({
           environment: env,
         });
 
-        console.log("all deployments", deployments)
+        console.log('all deployments', deployments);
+        console.log({ env, owner, repo, sha });
 
         const deployment =
           deployments.data.length > 0 &&
