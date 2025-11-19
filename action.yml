@@ -16,12 +16,16 @@ inputs:
   allow_inactive:
     description: 'Use the most recent inactive deployment (previously deployed preview) associated with the pull request if no new deployment is available.'
     required: false
+    default: 'false'
   check_interval:
     description: 'How often (in seconds) should we make the HTTP request checking to see if the deployment is available?'
     default: '2'
     required: false
   vercel_password:
     description: 'Vercel password protection secret'
+    required: false
+  vercel_protection_bypass_header:
+    description: 'Vercel protection bypass for automation'
     required: false
   path:
     description: 'The path to check. Defaults to the index of the domain'
@@ -34,5 +38,5 @@ outputs:
   vercel_jwt:
     description: 'If the deployment is using password protection, this will be a JWT. Otherwise, outputs an empty string'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
