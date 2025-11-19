@@ -1,15 +1,14 @@
-// @ts-check
 // Dependencies are compiled using https://github.com/vercel/ncc
-const core = require('@actions/core');
-const github = require('@actions/github');
-const axios = require('axios');
-const setCookieParser = require('set-cookie-parser');
+import core from '@actions/core';
+import github from '@actions/github';
+import type { GitHub } from '@actions/github/lib/utils.js';
 
-const calculateIterations = (maxTimeoutSec, checkIntervalInMilliseconds) =>
+const calculateIterations = (maxTimeoutSec: number, checkIntervalInMilliseconds: number) =>
   Math.floor(maxTimeoutSec / (checkIntervalInMilliseconds / 1000));
 
-const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+<<<<<<< Updated upstream:action.js
 const waitForUrl = async ({
   url,
   maxTimeout,
@@ -120,6 +119,9 @@ const getPassword = async ({ url, vercelPassword }) => {
 
   return vercelJwtCookie.value;
 };
+=======
+
+>>>>>>> Stashed changes:action.ts
 
 const waitForStatus = async ({
   token,
@@ -129,8 +131,17 @@ const waitForStatus = async ({
   maxTimeout,
   allowInactive,
   checkIntervalInMilliseconds,
+}: {
+  token: string;
+  owner: string;
+  repo: string;
+  deployment_id: number;
+  maxTimeout: number;
+  allowInactive: boolean;
+  checkIntervalInMilliseconds: number;
 }) => {
-  const octokit = new github.getOctokit(token);
+  // @ts-ignore
+  const octokit: InstanceType<typeof GitHub> = new github.getOctokit(token);
   const iterations = calculateIterations(
     maxTimeout,
     checkIntervalInMilliseconds
@@ -187,7 +198,7 @@ const waitForStatus = async ({
 };
 
 class StatusError extends Error {
-  constructor(message) {
+  constructor(message: string) {
     super(message);
   }
 }
@@ -210,12 +221,22 @@ const waitForDeploymentToStart = async ({
   actorName = 'vercel[bot]',
   maxTimeout = 20,
   checkIntervalInMilliseconds = 2000,
+}: {
+  octokit: ReturnType<typeof github.getOctokit>;
+  owner: string;
+  repo: string;
+  sha: string;
+  environment: string[];
+  actorName: string;
+  maxTimeout: number;
+  checkIntervalInMilliseconds: number;
 }) => {
   const iterations = calculateIterations(
     maxTimeout,
     checkIntervalInMilliseconds
   );
 
+<<<<<<< Updated upstream:action.js
   for (let i = 0; i < iterations; i++) {
     try {
       const deployments = await octokit.rest.repos.listDeployments({
@@ -224,6 +245,19 @@ const waitForDeploymentToStart = async ({
         sha,
         environment,
       });
+=======
+  if (Array.isArray(environment)) {
+    let arrayIndex = 0;
+    const iterateArray = (environment: string[]) => {
+      if (arrayIndex < environment.length) {
+        const string = environment[arrayIndex];
+        arrayIndex++;
+        return string;
+      }
+      arrayIndex = 0;
+      return environment[arrayIndex];
+    };
+>>>>>>> Stashed changes:action.ts
 
       const deployment =
         deployments.data.length > 0 &&
@@ -231,8 +265,33 @@ const waitForDeploymentToStart = async ({
           return deployment.creator.login === actorName;
         });
 
+<<<<<<< Updated upstream:action.js
       if (deployment) {
         return deployment;
+=======
+        const deployment = deployments.data.sort(
+          // @ts-ignore
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        )[0];
+
+        if (deployment) {
+          return deployment;
+        }
+
+        console.log(
+          `Could not find any deployments for actor ${actorName} & deployment ${env}, retrying (attempt ${
+            i + 1
+          } / ${iterations})`
+        );
+      } catch (e) {
+        console.log(
+          `Error while fetching deployments, retrying (attempt ${
+            i + 1
+          } / ${iterations})`
+        );
+
+        console.error(e);
+>>>>>>> Stashed changes:action.ts
       }
 
       console.log(
@@ -250,14 +309,44 @@ const waitForDeploymentToStart = async ({
       console.error(e)
     }
 
+<<<<<<< Updated upstream:action.js
     await wait(checkIntervalInMilliseconds);
+=======
+        const deployment =
+          deployments.data.length > 0 &&
+          deployments.data.find((deployment) => {
+            return deployment.creator?.login === actorName;
+          });
+
+        if (deployment) {
+          return deployment;
+        }
+
+        console.log(
+          `Could not find any deployments for actor ${actorName}, retrying (attempt ${
+            i + 1
+          } / ${iterations})`
+        );
+      } catch (e) {
+        console.log(
+          `Error while fetching deployments, retrying (attempt ${
+            i + 1
+          } / ${iterations})`
+        );
+
+        console.error(e);
+      }
+
+      await wait(checkIntervalInMilliseconds);
+    }
+>>>>>>> Stashed changes:action.ts
   }
 
   return null;
 };
 
-async function getShaForPullRequest({ octokit, owner, repo, number }) {
-  const PR_NUMBER = github.context.payload.pull_request.number;
+async function getShaForPullRequest({ octokit, owner, repo, number }: { octokit: ReturnType<typeof github.getOctokit>; owner: string; repo: string; number: number }) {
+  const PR_NUMBER = github.context.payload?.pull_request?.number
 
   if (!PR_NUMBER) {
     core.setFailed('No pull request number was found');
@@ -282,7 +371,7 @@ async function getShaForPullRequest({ octokit, owner, repo, number }) {
   return prSHA;
 }
 
-const run = async () => {
+export const run = async () => {
   try {
     // Inputs
     const GITHUB_TOKEN = core.getInput('token', { required: true });
@@ -355,7 +444,7 @@ const run = async () => {
     });
 
     // Get target url
-    const targetUrl = status.target_url;
+    const targetUrl = status?.target_url;
 
     if (!targetUrl) {
       core.setFailed(`no target_url found in the status check`);
@@ -379,8 +468,6 @@ const run = async () => {
       path: PATH,
     });
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed(error instanceof Error ? error.message : 'Unknown error');
   }
 };
-
-exports.run = run;
